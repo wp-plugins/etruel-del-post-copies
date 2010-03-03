@@ -10,7 +10,7 @@ Stable tag: 2.0
 This plugin search for duplicated title name posts and let you TRASH all duplicated posts in manual mode or automatic scheduled with Wordpress Cron.
 The plugin use the wordpress delete_post function then send to trash and delete custom fields too.
 
-You can read this in spanish.  Puedes leerlo en español aquí: [NetMDP](http://www.netmdp.com/2010/03/etruel-del-post-copies/)
+You can read this in spanish.  Puedes leerlo en espaÃ±ol aquÃ­: [NetMDP](http://www.netmdp.com/2010/03/etruel-del-post-copies/)
 
 == Installation ==
 1. Upload `plugin-name.php` to the `/wp-content/plugins/` folder
