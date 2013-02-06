@@ -5,9 +5,9 @@ Plugin URI: http://www.netmdp.com/2010/03/etruel-del-post-copies/
 Description: This plugin search for duplicated title name posts in the categories that you selected and let you TRASH all duplicated posts in manual mode or automatic scheduled with Wordpress Cron.  The plugin use the wordpress delete_post function then send to trash and delete custom fields too.
 Author: etruel
 Author URI: http://www.netmdp.com/
-Version: 3.02
+Version: 3.10
 Requires at least: 2.7
-Tested up to: 3.0.5
+Tested up to: 3.5.1
 */
 
 add_action('activate_WP-del_post_copies/WP-del_post_copies.php', 'etruel_del_post_copies_install');
@@ -173,11 +173,11 @@ function etruel_del_post_copies_run($mode = 'auto') {
 	if($mode == 'now' ) echo "<div class='updated fade'>Deleting: <br />";
 	
 	
-	if($cfg['allcat']) {
-		$query="select bad_rows.*, ok_id, post_date, ok_date
+	/*if($cfg['allcat']) {
+	$query="select bad_rows.*, ok_id, post_date, ok_date
 		from $wp_posts as bad_rows
 		inner join (
-			select $wp_posts.post_title, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id
+			select $wp_posts.post_title,$wp_posts.post_content, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id
 			from $wp_posts
 			WHERE (
 				(`post_status` = 'published') OR 
@@ -186,9 +186,9 @@ function etruel_del_post_copies_run($mode = 'auto') {
 			group by post_title
 			having count(*) > 1
 			) as good_rows on good_rows.post_title = bad_rows.post_title
-		and good_rows.ok_id <> bad_rows.id 
+		and good_rows.ok_id <> bad_rows.id and good_rows.post_content <> bad_rows.post_content 
 		ORDER BY post_title ".$limite ;
-	}else{
+	}else{*/
 		/******************************** ** This remain only for testing 
 		SELECT wp2.post_title, wp2.id, wp2.post_date, wp_terms.term_id, ok_id, ok_date, okcateg_id
 		FROM wp_terms 
@@ -215,13 +215,14 @@ function etruel_del_post_copies_run($mode = 'auto') {
 		ORDER BY post_title ASC 
 		LIMIT 0 , 20
 		***************************************/	
-		$query="SELECT wp2.post_title, wp2.id as ID, wp2.post_date, $wp_terms.term_id, ok_id, ok_date, okcateg_id
+		 if(get_option('titledel')==1 && get_option('contentdel')==1) {
+		  	$query="SELECT wp2.post_title, wp2.post_content, wp2.id as ID, wp2.post_date, $wp_terms.term_id, ok_id, ok_date, okcateg_id
 		FROM $wp_terms 
 		INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id
 		INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id
 		INNER JOIN $wp_posts as wp2 ON wp2.ID = $wp_term_relationships.object_id
 		INNER JOIN (
-			SELECT $wp_posts.post_title, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id, $wp_terms.term_id as okcateg_id
+			SELECT $wp_posts.post_title,$wp_posts.post_content, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id, $wp_terms.term_id as okcateg_id
 			FROM $wp_terms
 				INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id
 				INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id
@@ -232,15 +233,72 @@ function etruel_del_post_copies_run($mode = 'auto') {
 				 AND ($wp_terms.term_id IN ( $categories ))
 			GROUP BY post_title, $wp_terms.term_id 
 			HAVING COUNT( * ) >1
-		) as good_rows ON good_rows.post_title = wp2.post_title AND good_rows.ok_id <> wp2.id AND good_rows.okcateg_id = $wp_terms.term_id
+		) as good_rows ON good_rows.post_title = wp2.post_title  OR good_rows.post_content = wp2.post_content AND good_rows.ok_id <> wp2.id AND good_rows.okcateg_id = $wp_terms.term_id
 		WHERE taxonomy =  'category'
 			AND wp2.post_type =  'post'
 			AND ((wp2.post_status =  'published') OR (wp2.post_status =  'publish'))
 			AND ($wp_terms.term_id IN ( $categories ))
 		ORDER BY post_title ASC ".$limite ;
-	}
+		
+		 } elseif(get_option('contentdel')==1)	{
+			$query="SELECT wp2.post_title, wp2.post_content, wp2.id as ID, wp2.post_date, $wp_terms.term_id, ok_id, ok_date, okcateg_id 
+			FROM $wp_terms 
+			INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id 
+			INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id 
+			INNER JOIN $wp_posts as wp2 ON wp2.ID = $wp_term_relationships.object_id 
+			INNER JOIN ( 
+				SELECT $wp_posts.post_title,$wp_posts.post_content, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id, $wp_terms.term_id as okcateg_id 
+				FROM $wp_terms INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id 
+				INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id 
+				INNER JOIN $wp_posts ON $wp_posts.ID = $wp_term_relationships.object_id 
+				WHERE taxonomy = 'category' AND $wp_posts.post_type = 'post' 
+					AND ((post_status = 'published') OR (post_status = 'publish')) 
+					AND ($wp_terms.term_id IN ( 4,1 )) 
+					GROUP BY post_content, $wp_terms.term_id HAVING COUNT( * ) >1 ) 
+				AS good_rows ON good_rows.post_content = wp2.post_content 
+				AND good_rows.ok_id <> wp2.id 
+				AND good_rows.okcateg_id = $wp_terms.term_id 
+			WHERE taxonomy = 'category' 
+				AND wp2.post_type = 'post' 
+				AND ((wp2.post_status = 'published') OR (wp2.post_status = 'publish')) 
+				AND ($wp_terms.term_id IN ( 4,1 )) 
+			ORDER BY post_title ASC ".$limite ;
+		
+		} else { //only title
+		 
+		 	$query="SELECT wp2.post_title, wp2.post_content, wp2.id as ID, wp2.post_date, $wp_terms.term_id, ok_id, ok_date, okcateg_id
+		FROM $wp_terms 
+		INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id
+		INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id
+		INNER JOIN $wp_posts as wp2 ON wp2.ID = $wp_term_relationships.object_id
+		INNER JOIN (
+			SELECT $wp_posts.post_title,$wp_posts.post_content, $wp_posts.id, $wp_posts.post_date as ok_date, MIN( $wp_posts.id ) AS ok_id, $wp_terms.term_id as okcateg_id
+			FROM $wp_terms
+				INNER JOIN $wp_term_taxonomy ON $wp_terms.term_id = $wp_term_taxonomy.term_id
+				INNER JOIN $wp_term_relationships ON $wp_term_relationships.term_taxonomy_id = $wp_term_taxonomy.term_taxonomy_id
+				INNER JOIN $wp_posts ON $wp_posts.ID = $wp_term_relationships.object_id
+			WHERE taxonomy =  'category'
+				AND $wp_posts.post_type =  'post'
+				AND ((post_status =  'published') OR (post_status =  'publish'))
+				 AND ($wp_terms.term_id IN ( $categories ))
+			GROUP BY post_title, $wp_terms.term_id 
+			HAVING COUNT( * ) >1
+		) as good_rows ON good_rows.post_title = wp2.post_title  AND  good_rows.ok_id <> wp2.id AND good_rows.okcateg_id = $wp_terms.term_id
+		WHERE taxonomy =  'category'
+			AND wp2.post_type =  'post'
+			AND ((wp2.post_status =  'published') OR (wp2.post_status =  'publish'))
+			AND ($wp_terms.term_id IN ( $categories ))
+		ORDER BY post_title ASC ".$limite ;
+		
+		
+		 }
+		
+		 
+		 
+	/*}*/
 	
 	if($mode == 'show' ) {
+	
 		$dupes = $wpdb->get_results($query) ;
 		$dispcount= 0;
 		echo "<div class=\"wrap\">

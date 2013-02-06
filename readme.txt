@@ -3,8 +3,8 @@ Contributors: Esteban Truelsegaard
 Donate link: http://www.netmdp.com
 Tags: posts, copies, duplicate posts, delete copies, delete, erase, cron, squedule, squedule delete
 Requires at least: 2.7
-Tested up to: 3.0.5
-Stable tag: 3.02
+Tested up to: 3.5.1
+Stable tag: 3.10
 
 == Description ==
 This plugin search for duplicated title name posts in the categories that you selected and let you TRASH all duplicated posts in manual mode or automatic scheduled with Wordpress Cron.
@@ -21,6 +21,9 @@ NOTE: May be the firsdt time you see something rare... save options for fix.
 Upgrading from Version 2.00
 You must deactivate old plugin and then upload and activate this.
 
+Upgrading to Version 3.10
+You must activate Check on title and/or Check on content on Settings page.
+
 == Frequently Asked Questions ==
 Nothing for now.  You can ask in plugin URI: [NetMDP](http://www.netmdp.com/2010/03/etruel-del-post-copies/)
 
@@ -29,6 +32,10 @@ Nothing for now.  You can ask in plugin URI: [NetMDP](http://www.netmdp.com/2010
 2. Logs saved shows at bottom of Options Page.
 
 == Changelog ==
+
+= 3.10 =
+* Added options to search duplicates for title or content. 
+* Added scrolled log to bottom of page. 
 
 = 3.02 =
 * some fixes in main query. 

@@ -3,6 +3,8 @@
  * @package WordPress_Plugins
  * @subpackage WP-eDel post copies
 */
+error_reporting(0);
+
 if(!defined('WP_ADMIN') OR !current_user_can('manage_options')) wp_die(__('You do not have sufficient permissions to access this page.'));
 
 etruel_del_post_copies_locale();
@@ -247,6 +249,31 @@ function WPdpc_save_options($cfg)  {
 
 $cfg = get_option('WP-del_post_copies_options'); 
 
+if(isset($_POST["ctdel"]))
+{
+if($_POST["titledel"])
+		{
+	
+		update_option('titledel',1);
+		}
+		else
+		{
+		update_option('titledel',0);
+		}
+		
+		
+		
+			if($_POST["contentdel"])
+		{
+		update_option('contentdel',1);
+		}
+		else
+		{
+		update_option('contentdel',0);
+		}
+		}
+		
+		
 if($_POST['quickdo'] == 'WPdpc_logerase') {
 	check_admin_referer('WPdpc_quickdo');
 	$cfg['logs'] = array();
@@ -278,7 +305,8 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 <div class="wrap"> 
 	<h2><?php echo '<img src="'.WP_CONTENT_URL . '/plugins/' . plugin_basename(dirname(__FILE__)). '/wpedpc.png"/>'; ?><?php _e('WP-eDel post copies Options', 'WP-del_post_copies'); ?></h2>
 	<ul class="subsubsub">
-		<li><form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>"> 
+
+	<li><form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>"> 
 			<?php wp_nonce_field('WPdpc_quickdo'); ?>
 			<select name="quickdo" style="display:inline;">
 				<!-- option value="WPdpc_counter"><?php _e('Count Copies (do nothing)', 'WP-del_post_copies'); ?></option  -->
@@ -291,17 +319,23 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 	</ul>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>"> 
 	<?php wp_nonce_field('WPdpc_options'); ?>
-	<table class="form-table">
+	<table class="form-table" style="width: auto;border: 1px solid;">
+		<tr>
+			<th scope="row" colspan="3" nowrap="nowrap"><b><?php _e('Details:', 'WP-del_post_copies'); ?></b></th>
+		</tr>
 		<tr valign="top">
-			<th scope="row" nowrap="nowrap"><?php _e('Details:', 'WP-del_post_copies'); ?></th>
-			<td><?php _e('Limit per time:', 'WP-del_post_copies'); ?> <input class="small-text" type="text" value=<?php echo $cfg['limit']; ?> name="limit">:<?php _e('0 delete ALL copies at once.(Not Recommended)', 'WP-del_post_copies'); ?>
+			<td colspan="2"><?php _e('Limit per time:', 'WP-del_post_copies'); ?> <input class="small-text" type="text" value=<?php echo $cfg['limit']; ?> name="limit">:<?php _e('0 delete ALL copies at once.(Not Recommended)', 'WP-del_post_copies'); ?>
+			<br/><br/>
+	<input type="checkbox" value="1" <?php if(get_option('titledel')==1) { echo " checked = 'checked' ";} ?> name="titledel" id="titledel" /> Check On Title<br/>
+			<input type="checkbox" value="1"  <?php if(get_option('contentdel')==1) { echo " checked = 'checked' ";} ?>  name="contentdel" id="contentdel" /> Check On Content
+			<input type="hidden" value="1" name="ctdel" />
 			</td>
-			<td rowspan="4">  <!-- Categories -->
+			<td rowspan="3">  <!-- Categories -->
 				<input style="display:inline" onclick="if(this.checked==0){jQuery('.catbox').removeAttr('disabled');}else{jQuery('.catbox').attr('disabled','true');};" type="checkbox" id="allcat" name="allcat" value="1" <?php echo ($cfg['allcat'] ? 'checked="checked"' : ''); ?> /><b><?php _e('Ignore Categories', 'WP-del_post_copies'); ?></b> <br />
 				<div id="cat-box" class="postbox widefat">
 					<span style="float:left; padding: 08px 30px 0 5px; "><input type="checkbox" style="display:inline" onclick="jQuery('.checkbox').children('input').attr('checked', this.checked);" name="todas" value="1" class="catbox"><b>Select all</b> </span>
 					<h3 class="hndle" style="margin: 0pt; padding: 6px; height: 16px;"><span><?PHP _e('Categories','WP-del_post_copies'); ?></span></h3>
-					<div class="inside" style="overflow-y: scroll; overflow-x: hidden; max-height: 250px;">
+					<div class="inside" style="overflow-y: scroll; overflow-x: hidden; max-height: 310px;">
 					<ul id="categories" style="font-size: 11px;">
 						<?php WPdpc_adminEditCategories($cfg['categories']) ?>
 					</ul> <script>if(jQuery("#allcat").is(":checked")){jQuery('.catbox').attr('disabled','true');}else{jQuery('.catbox').removeAttr('disabled');};</script>
@@ -312,8 +346,8 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 				</div>	
 			</td>
 		<tr valign="top">
-			<div id="jobschedule" class="postbox">
 			<td colspan="2">
+				<div id="jobschedule" class="postbox">
 				<h3 class="hndle"><span><?PHP _e('Schedule','WP-del_post_copies'); ?></span></h3>
 				<div class="inside">
 					<b><?php _e('Active:', 'WP-del_post_copies'); ?></b> <input style="display:inline" 
@@ -423,6 +457,7 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 					?>
 					</div>
 				</div>
+				</div>
 			</td>
 		 </tr>
 		 <tr>
@@ -435,13 +470,15 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 	</form>
 </div>
 <br />
-<p>Copyright &copy; 2011 <a href="http://www.netmdp.com" target="_blank">Esteban Truelsegaard</a></p>
+<br />
+<p>Copyright &copy; 2013 <a href="http://www.netmdp.com" target="_blank">Esteban Truelsegaard</a></p>
 <br />
 <!-- div id="message" class="updated fade"><p><?php //echo implode('<br />', $WPdpc_msg); ?></p></div  -->
 <?php if(!empty($cfg['logs'])): ?>
 <div class="wrap">
 <h2><?php _e('Del Post Copies Logs', 'WP-del_post_copies'); ?></h2><br />
-<table class="widefat">
+<div style="overflow-y: scroll; overflow-x: hidden; max-height: 310px;">
+<table class="widefat" style="overflow-y: scroll; overflow-x: hidden; max-height: 310px;">
 <thead>
   <tr>
 	<th scope="col">#</th>
@@ -467,5 +504,6 @@ foreach($cfg['logs'] AS $log): ?>
   <?php endforeach; ?>
 </tbody>
 </table>
+</div>
 </div>
 <?php endif; ?>
