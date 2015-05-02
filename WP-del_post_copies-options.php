@@ -108,15 +108,15 @@ $is_safe_mode = ini_get('safe_mode') == '1' ? 1 : 0;
 				
 				foreach($times AS $time):
 					$max = $time == 'hours' ? 24 : 60; ?><label>
-               <?php
-               if($time == 'hours')  _e('Hours', 'WP-del_post_copies');
+					<?php
+					if($time == 'hours')  _e('Hours', 'WP-del_post_copies');
 					elseif($time == 'minutes')  _e('Minutes', 'WP-del_post_copies');
 					elseif($time == 'seconds')  _e('Seconds', 'WP-del_post_copies');
 					?>: <select name="<?php echo $time; ?>">
 					<?php for ($i = 0; $i<$max; $i++): $selected = ($$time == $i) ? 'selected' : ''; ?>
 					<option value="<?php echo $i; ?>" <?php echo $selected; ?>><?php echo $i; ?></option>
 					<?php endfor; ?>
-					</select></label>&nbsp;<?
+					</select></label>&nbsp;<?php
 				endforeach;
 				?></div>
 		</tr>
