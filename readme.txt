@@ -31,9 +31,8 @@ Is probable that if there is a large amount of duplicate posts, due to each serv
 
 PLEASE MAKE BACKUPs OF YOUR DATABASE AND FILES BEFORE USE.  This will avoid you many problems if something goes wrong.
 
-Very soon you will also use the new Add-On [WP-eDel-Oldest-Posts](http://etruel.com/downloads/wp-edel-oldest-post/) to select a date to delete all posts published before that date and/or you can establish a period with a cron job to continuously deleting old posts and just remains that period on database.
-
 = Add-On =
+Very soon you will also use the new Add-On [WP-eDel-Oldest-Posts](http://etruel.com/downloads/wp-edel-oldest-post/) to select a date to delete all posts published before that date and/or you can establish a period with a cron job to continuously deleting old posts and just remains that period on database.
 
 DISCLAIMER:
 This plugin is to delete posts and/or images and other. Use with very much caution.
