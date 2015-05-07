@@ -5,9 +5,9 @@ Plugin URI: http://www.netmdp.com/2010/03/etruel-del-post-copies/
 Description: This plugin searches duplicate posts by title or content, filtering by category and can permanently delete them with images or send them to the trash in manual mode or automatic squeduled with Wordpress cron.
 Author: etruel
 Author URI: http://www.netmdp.com/
-Version: 4.0
+Version: 4.0.1
 Requires at least: 4.1
-Tested up to: 4.2
+Tested up to: 4.2.2
 */
 
 register_activation_hook( plugin_basename( __FILE__ ), array( 'WPeDelPostCopies', 'activate' ) );
@@ -56,7 +56,7 @@ class WPeDelPostCopies {
 		self :: $uri = plugin_dir_url( __FILE__ );
 		self :: $dir = plugin_dir_path( __FILE__ );
 		self :: etruel_del_post_copies_locale();
-		$plugin_data = get_plugin_data( __FILE__ );
+		if(is_admin()) $plugin_data = get_plugin_data( __FILE__ );
 		self :: $name = $plugin_data['Name'];
 		self :: $version = $plugin_data['Version'];
 
